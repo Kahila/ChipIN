@@ -3,8 +3,6 @@ package model.blockchain;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 
-//import java.security.*;
-//import java.util.*;
 
 public class Block {
 	// for better abstraction make all private and then create getters and setters

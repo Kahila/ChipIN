@@ -7,22 +7,18 @@ import model.blockchain.*;
 
 public class Client implements Comparable<Client>{
 	private String username;
-	private String password;
 	private String privateKey;
 	private String publicKey;
 	private int accountType;
     private float balance; // amount in the wallet
-    private int clientId; // identifies client on the server
     private ArrayList<Block> blockchain = new ArrayList < Block > ();
 	
-	public Client(String username,String password, int clientId, int accountType, float balance, ArrayList<Block> blockchain ) {
+	public Client(String username,String password, int accountType, float balance ) {
 		this.username = username;
-		this.password = password;
 		this.accountType = accountType;
 		this.balance = balance;
-		this.clientId = clientId;
+		
 		generateKeyPair();
-        this.blockchain = blockchain;
 	}
 	
 	//method that calculates the key pair value (primary and private keys)
@@ -74,21 +70,34 @@ public class Client implements Comparable<Client>{
 		return 0;
 	}
 
-	//getters
-//	public String getUsername() {
-//		return (username);
-//	}
-//	
-//	public String getPassword() {
-//		return (password);
-//	}
+	public String getClintInfo() {
+		String type = "Funding";
+		if (accountType == 1)
+			type = "Need Funds";
+		return ("client :" + username + "\t" + type);
+	}
 	
-	//setters
-//	public void setUsername(String username) {
-//		this.username = username;
-//	}
-//	
-//	public void setPassword(String password) {
-//		this.password = password;
-//	}
+	public String getUsername() {
+		return (username);
+	}
+	
+	public float getwallet() {
+		return balance;
+	}
+	public void setUsername() {
+		username = "";
+	}
+	
+	public String getPublicKey() {
+		return publicKey;
+	}
+	
+	public String getPrivateKey() {
+		return privateKey;
+	}
+	
+	public void setBalance(float amount) {
+		balance += amount;
+	}
+	
 }

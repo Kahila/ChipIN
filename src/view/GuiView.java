@@ -1,7 +1,9 @@
 package view;
 
+import java.util.Arrays;
+
 /*
- * @author: Adonis Kahila
+ * @author Kahila kalombo
  * @version: 1.0
  * @class GuiView
  * This Class Contains only code that has to do with the user interface
@@ -12,6 +14,7 @@ import controller.Controller;
 
 //import model.
 import javafx.collections.FXCollections;
+import javafx.event.EventHandler;
 //javafx imports
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -27,18 +30,15 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
-import model.graphs.ChipInGraph;
-import model.graphs.Client;
-import model.sockets.ChipINServer;
 
 public class GuiView {
 	private Controller controller = new Controller();
-	private ChipInGraph  graph= ChipINServer.getGraph();
 	
 	private static String wall = "https://images.unsplash.com/photo-1459257831348-f0cdd359235f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1650&q=80";
 	private static Stage stage = null;
@@ -50,6 +50,15 @@ public class GuiView {
 	private GridPane homePane = null; // landing page pane
 	private Scene registerScence = null;
 	private Alert alert = null;
+	private boolean request = false;
+	private String funds = "";
+	private String[] selectFund = {};
+	private int i = 0;
+	private TextField username;
+	private int amountInWallet;
+	@SuppressWarnings("unused")
+	private boolean transected = false;
+	private int tr = 0;
 	
 	private final Spinner<Integer> spinner = new Spinner<Integer>();
 	private final int initialValue = 1000;
@@ -58,6 +67,8 @@ public class GuiView {
 	private TextArea ta = null;
 	private Label lpassword = new Label("Password:");
 	private PasswordField  password = new PasswordField();
+	
+	private String clientUsername = "";
 	
 	//Parameterized constructor
 		public GuiView(Stage stage1) {
@@ -69,81 +80,112 @@ public class GuiView {
 		public void setUpUI() {
 			stage.setTitle("ChipIN");
 			
-			login();
+			register();
 			stage.show();
 		}
 		
 		//start of landing page
 		//first page of GUI (landing page)
-		private void login() {
-
+		private void fund() {
 			firstPane = new GridPane();
 			sceneP1 = new Scene(firstPane, 1500, 800);
-//			graph = new ChipInGraph();
+			Label lhistory = new Label("transection history:");
+			TextArea history = new TextArea();
+			Button rfund = new Button("fund");
+			Button logout = new Button("exit");
+			 
+			 logout.setOnAction(value ->{
+				 controller.getClient().clientInput(clientUsername + ",exit");
+				 System.exit(-1);
+			 });
+			 
+			 Label amount = new Label("amount:");
+			 SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, amountInWallet, initialValue);
+			 spinner.setValueFactory(valueFactory);
+			 
+			 Label lclients = new Label("Clients:");
+			 TextArea clients = new TextArea();
+			 
+			 firstPane.setAlignment(Pos.CENTER);
+			 history.setDisable(true);
+			 
+//			 ComboBox<String> tfID = new ComboBox<String>(FXCollections.observableArrayList(selectFund));
+			 ComboBox<String> tfID = new ComboBox<String>();
+			 
+			 firstPane.addEventFilter(MouseEvent.MOUSE_PRESSED, new EventHandler<MouseEvent>() {
+				 @Override
+				 public void handle(MouseEvent mouseEvent) {
+					 controller.getClient().clientInput("his");
+					 controller.getClient().clientInput("client");
+					 controller.getClient().clientInput("get");
+					 clients.setText((controller.getClient().getClients()));
+					 funds = (controller.getClient().getFunding());
+//					 history.appendText(funds);
+					 selectFund = funds.split(",");
+					 
+					 while( i < selectFund.length) {
+						 tfID.getItems().add(selectFund[i]);
+						 i++;
+					 }
+					 
+				    history.setText(controller.getClient().getTransection());
+				 }
+			 });
 			
+			 //action for funding
+			 rfund.setOnAction(value ->{
+				 if (tfID.getSelectionModel().getSelectedItem() != null) {
+					 controller.getClient().clientInput(tfID.getSelectionModel().getSelectedItem() + "," + username.getText() +","+ spinner.getValue() +",send");
+					 transected = true;					 
+				 }
+				 else {
+					 alert.setAlertType(AlertType.ERROR);
+						alert.setTitle("ERROR");
+						alert.setContentText("Please select person to fund, if available");
+						alert.show();
+				 }
+			 });
+			 
+			clients.setDisable(true);
+			clients.setStyle("-fx-text-fill: #4cd137;");
 			
-			Label lname = new Label("Username:");
-			Label lwallet = new Label("Wallet Amount:");
-			TextField username = new TextField();
-			Button select = new Button("submit");
-			Button register = new Button("register");
+			clients.setPrefWidth(300);
+			clients.setPrefHeight(400);
+			history.setPrefWidth(300);
+			history.setPrefHeight(400);
+			logout.setPrefWidth(300);
+			logout.setPrefHeight(50);
+			rfund.setPrefWidth(300);
+			rfund.setPrefHeight(50);
+			spinner.setPrefWidth(300);
+			spinner.setPrefHeight(50);
+			tfID.setPrefWidth(300);
+			tfID.setPrefHeight(50);
 			
-			
-			
-			ta = new TextArea();
-			ta.setDisable(true); //making the text Area unEditable
-			ta.setStyle("-fx-text-fill: #4cd137;");
-			username.setFont(Font.font("Verdana", FontWeight.NORMAL, 12));
-			
-			//attempting to connect to server
-			if (!connected && (connected = controller.connectToServer()) || connected) {
-				ta.appendText("Connected to the ChipIN server\n");
-				ta.setStyle("-fx-font-weight: bold; -fx-text-fill: green;");
-			}else {
-				ta.appendText("Not connected to the ChipIN server\n");
-				ta.setStyle("-fx-font-weight: bold; -fx-text-fill: red;");
-			}
-			
-			select.setPrefWidth(300);
-			select.setPrefHeight(50);
-			register.setPrefWidth(300);
-			register.setPrefHeight(50);
-			username.setPrefWidth(300);
-			username.setPrefHeight(50);
-			password.setPrefWidth(300);
-			password.setPrefHeight(50);
-			ta.setPrefWidth(300);
-			ta.setPrefHeight(50);
-			select.setStyle("-fx-font-weight: bold; -fx-font-size: 20px; -fx-text-fill: Black;");
-			register.setStyle("-fx-font-weight: bold; -fx-font-size: 20px; -fx-text-fill: Black;");
-			lname.setStyle("-fx-font-weight: bold; -fx-font-size: 20px; -fx-text-fill: Black;");
-			lwallet.setStyle("-fx-font-weight: bold; -fx-font-size: 20px; -fx-text-fill: Black;");
-			lpassword.setStyle("-fx-font-weight: bold; -fx-font-size: 20px; -fx-text-fill: Black;");
 			firstPane.setStyle("-fx-background-image: url('"+wall+"'); " + "-fx-background-position: center center; " + "-fx-background-repeat: stretch;");
-			firstPane.setAlignment(Pos.CENTER);
+			lhistory.setStyle("-fx-font-weight: bold; -fx-font-size: 20px; -fx-text-fill: Black;");
+			lclients.setStyle("-fx-font-weight: bold; -fx-font-size: 20px; -fx-text-fill: Black;");
+			amount.setStyle("-fx-font-weight: bold; -fx-font-size: 20px; -fx-text-fill: Black;");
 			
-			firstPane.add(lname, 0, 0);
-			firstPane.add(username, 0, 1);
-			firstPane.add(lpassword, 1, 0);
-			firstPane.add(password, 1, 1);
-			firstPane.add(select, 0, 2);
-			firstPane.add(register, 1, 2);
-			firstPane.add(ta, 0, 3);
+			firstPane.add(lhistory, 0, 0);
+			firstPane.add(history, 0, 1);
+			firstPane.add(lclients, 1, 0);
+			firstPane.add(clients, 1, 1);
+			firstPane.add(spinner, 1, 2);
+			firstPane.add(rfund, 1, 3);
+			firstPane.add(tfID, 0, 2);
+			firstPane.add(logout, 0, 3);
+			GridPane.setMargin(clients, new Insets(0, 10, 10, 20));
+			GridPane.setMargin(lclients, new Insets(0, 0, 0, 20));
+			GridPane.setMargin(history, new Insets(0, 10, 10, 20));
+			GridPane.setMargin(lhistory, new Insets(0, 0, 0, 20));
+			GridPane.setMargin(rfund, new Insets(10, 0, 0, 20));
+			GridPane.setMargin(logout, new Insets(10, 0, 0, 20));
+			GridPane.setMargin(tfID, new Insets(10, 0, 0, 20));
+			GridPane.setMargin(amount, new Insets(0, 0, 0, 20));
+			GridPane.setMargin(spinner, new Insets(0, 0, 0, 20));
 			
-			GridPane.setMargin(username, new Insets(0, 0, 10, 0));
-			GridPane.setMargin(select, new Insets(0, 0, 10, 0));
-			GridPane.setMargin(register, new Insets(0, 0, 10, 5));
-			GridPane.setMargin(password, new Insets(0, 0, 10, 5));
-			GridPane.setMargin(lpassword, new Insets(0, 0, 0, 5));
-			GridPane.setMargin(ta, new Insets(10, 0, 10, 0));
-			
-			// adding actions to buttons
-			
-			//redirect to register
-			register.setOnAction(value ->{
-				register();
-//				homePage();
-			});
+//			clients.appendText(controller.getClient().getClients());
 			
 			stage.setScene(sceneP1);
 		} // end of landing page
@@ -155,15 +197,17 @@ public class GuiView {
 			
 			SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(20, 500000, initialValue);
 			spinner.setValueFactory(valueFactory);
+			amountInWallet = valueFactory.getValue();
+			
 			
 			alert = new Alert(AlertType.NONE);
 			
 			Label lname = new Label("Username:");
 			Label lwallet = new Label("Wallet Amount:");
 			Label ltf = new Label("Account Type:");
-			TextField username = new TextField();
+			username = new TextField();
 			Button register = new Button("submit");
-			Button login = new Button("back to login");
+			Button login = new Button("exit");
 			String accountType[] = {"Fund Someone", "Get Funding"};
 			
 			ta = new TextArea();
@@ -172,8 +216,10 @@ public class GuiView {
 			username.setFont(Font.font("Verdana", FontWeight.NORMAL, 12));
 			ComboBox<String> tfID = new ComboBox<String>(FXCollections.observableArrayList(accountType));
 			
+			
 			// checking if connected
-			if (connected) {
+			//attempting to connect to server
+			if (!connected && (connected = controller.connectToServer()) || connected) {
 				ta.appendText("Connected to the ChipIN server\n");
 				ta.setStyle("-fx-font-weight: bold; -fx-text-fill: green;");
 			}else {
@@ -227,13 +273,9 @@ public class GuiView {
 			GridPane.setMargin(ltf, new Insets(0, 0, 0, 5));
 			GridPane.setMargin(ta, new Insets(0, 0, 10, 0));
 			
-//			password.
-			
-			// adding actions to buttons
-			
 			//redirect to register
 			login.setOnAction(value ->{
-					login();
+				System.exit(-1);
 			});
 			
 			register.setOnAction(value ->{
@@ -245,8 +287,11 @@ public class GuiView {
 							alert.setContentText("please select account type");
 							alert.show();
 						}else { // take to funding request page
-							if (controller.getClient().clientInput(username.getText()+","+password.getText()+","+spinner.getValue()+","+tfID.getValue()) && tfID.getValue() == "Get Funding") {
+							if (controller.getClient().clientInput(username.getText()+","+password.getText()+","+spinner.getValue()+","+tfID.getValue()+ ",register") && tfID.getValue() == "Get Funding") {
+								clientUsername = username.getText();
 								homePage();
+							}else {
+								fund();
 							}
 						}
 					}else {
@@ -275,18 +320,55 @@ public class GuiView {
 			TextArea history = new TextArea();
 			Label lfund = new Label("request funding (details):");
 			TextArea fund = new TextArea();
-			Button logout = new Button("logout");
+			Button logout = new Button("Exit");
 			Button rfund = new Button("request funding");
 			ProgressBar progressBar = new ProgressBar(0);
+			Label lclients = new Label("Clients:");
+			TextArea clients = new TextArea();
+			progressBar.setProgress(0.0);
 			
 			Label amount = new Label("amount:");
 			SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(20, 500000, initialValue);
 			spinner.setValueFactory(valueFactory);
 			
-			Label lclients = new Label("Clients:");
-			TextArea clients = new TextArea();
-			progressBar.setProgress(0.05);
-		
+			//setting event handler
+			
+			homeScene.addEventFilter(MouseEvent.MOUSE_PRESSED, new EventHandler<MouseEvent>() {
+			    @Override
+			    public void handle(MouseEvent mouseEvent) {
+			    	controller.getClient().clientInput("client");
+			    	clients.setText((controller.getClient().getClients()));
+			    	
+			    	controller.getClient().clientInput("his");
+			    	 if (controller.getClient().getTransection().length() > 0) {
+			    		 String[] split = controller.getClient().getTransection().trim().split(",");
+			    		 history.setText(controller.getClient().getTransection());
+			    		 System.out.println("------------"+Arrays.toString(split));
+			    		 progressBar.setProgress(tr++);			    		 
+			    	 }
+			    }
+			});
+			
+			/// request find submit 
+			rfund.setOnAction(value ->{
+				if (!request && fund.getText().length() > 10) {
+					fund.setDisable(true);
+					spinner.setDisable(true);
+					controller.getClient().clientInput(clientUsername + "," + fund.getText() +","+ spinner.getValue() +",qry");
+					request = true;
+				}else {
+					alert.setAlertType(AlertType.ERROR);
+					alert.setTitle("ERROR");
+					alert.setContentText("Pleas make sure that the reason for funding is longer than 10 charectors");
+					alert.show();
+				}
+			});
+			
+			logout.setOnAction(value ->{
+				controller.getClient().clientInput(clientUsername + ",exit");
+				System.exit(-1);
+			});
+			
 			homePane.setAlignment(Pos.CENTER);
 			
 			history.setDisable(true);
@@ -320,7 +402,7 @@ public class GuiView {
 			homePane.add(history, 0, 1);
 			homePane.add(lclients, 1, 0);
 			homePane.add(clients, 1, 1);
-			homePane.add(progressBar, 0, 2);
+//			homePane.add(progressBar, 0, 2);
 			homePane.add(lfund, 2, 0);
 			homePane.add(fund, 2, 1);
 //			homePane.add(amount, 2, 2);
@@ -338,6 +420,9 @@ public class GuiView {
 			GridPane.setMargin(amount, new Insets(0, 0, 0, 20));
 			GridPane.setMargin(spinner, new Insets(0, 0, 0, 20));
 			GridPane.setMargin(progressBar, new Insets(0, 0, 0, 20));
+			
+//			clients.appendText(controller.getClient().getClients());
+			
 			stage.setScene(homeScene);
 		} // end home page
 		

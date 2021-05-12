@@ -1,53 +1,77 @@
 package model.sockets;
 
-import java.io.BufferedOutputStream;
+/*
+ * @author Kahila kalombo
+ * @version: 1.0
+ * @class ClientSocker
+ * This Class contains client code (uses UDP for data communication)
+ * */
+
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-//import java.io.PrintWriter;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.nio.charset.Charset;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 
 public class ClientSocket {
-	private Socket socket;
-	private PrintWriter out;
-	private BufferedReader in;
-	
 	private boolean connected = false;
+	private DatagramSocket clientSocket;
+	private InetAddress IPAddress;
+	private String clients = "";
+	private String funding = "";
+	private String Transection = "";
 	
-	//method for connecting client to server
 	private void connect() {
-	    try {
-	    	socket = new Socket("localhost", 5000);
-	        out = new PrintWriter(socket.getOutputStream(), true); 
-	        in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-//	        BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
-	        connected = true;
-	    } catch (Exception e) {connected = false;}
-	}
-	
-	//method that sends client input to server
-	public boolean clientInput(String input1) {
 		try {
-			String userInput = input1;
-			out.println(userInput);
-			System.out.println("echo: " + in.readLine());
-			return true;
-		} catch (IOException e) {
-			return false;
+			@SuppressWarnings("unused")
+			BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
+		    clientSocket = new DatagramSocket();
+		    IPAddress = InetAddress.getByName("localhost");
+		    connected = true;
+		} catch (Exception e) {
+		    clientSocket.close();
+		    connected = false;
 		}
 	}
 	
-	// getters
+	//send query to server
+	public boolean clientInput(String line) {
+		byte[] sendData = new byte[1024];
+		byte[] receiveData = new byte[1024];
+		try {
+			sendData = line.getBytes();
+			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 9876);
+			clientSocket.send(sendPacket);
+			DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+			clientSocket.receive(receivePacket);
+			String modifiedSentence = new String(receivePacket.getData());
+			if (line.compareTo("client") == 0)
+				clients = modifiedSentence;
+			else if (line.compareTo("get") == 0)
+				funding = modifiedSentence;
+			else if (line.compareTo("his") == 0)
+				Transection = modifiedSentence;
+			System.out.println("FROM SERVER:" + modifiedSentence);
+			return true;
+		}catch(Exception e) {
+			return (false);
+		}
+	}
+	
+	public String getClients() {
+		return clients;
+	}
+	
 	public boolean getConnected() {
 		connect();
-		return connected;
+		return (connected);
+	}
+	
+	public String getFunding() {
+		return funding;
+	}
+	
+	public String getTransection() {
+		return (Transection);
 	}
 }

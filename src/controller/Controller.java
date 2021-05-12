@@ -1,3 +1,9 @@
+/**
+ * controller class that communicates with the view and the model
+ * <br>
+ * @author kahila Kalombo <218095095@student.uj.ac.za>
+ */
+
 package controller;
 
 import javafx.application.Application;

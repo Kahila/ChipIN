@@ -4,33 +4,8 @@ import java.util.ArrayList;
 
 public class BlockChain {
 	public static ArrayList<Block> blockchain = new ArrayList<>();
-	public static int difficulty = 3;
+	public static int difficulty = 4;
 	
-//	public static ArrayList < Transaction > transactions = new ArrayList < Transaction > ();
-//	public static void main(String[] args) {
-//	    Wallet A = new Wallet(blockchain);
-//	    Wallet B = new Wallet(blockchain);
-//	    System.out.println("Wallet A Balance: " + A.getBalance());
-//	    System.out.println("Wallet B Balance: " + B.getBalance());
-//
-//	    System.out.println("Add two transactions... ");
-//	    Transaction tran1 = A.send(B.publicKey, 10);
-//	    if (tran1 != null) {
-//	        transactions.add(tran1);
-//	    }
-//	    Transaction tran2 = A.send(B.publicKey, 20);
-//	    if (tran2 != null) {
-//	        transactions.add(tran2);
-//	    }
-//	    Block b = new Block(0, null, transactions);
-//	    b.mineBlock(difficulty);
-//	    blockchain.add(b);
-//	    System.out.println("Wallet A Balance: " + A.getBalance());
-//	    System.out.println("Wallet B Balance: " + B.getBalance());
-//	    System.out.println("Blockchain Valid : " +
-//	        validateChain(blockchain));
-//	}
-			
 	/*
 	 * method that will check if the blocks in the chain are valid
 	 * @return boolean value
