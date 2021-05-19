@@ -24,6 +24,11 @@ Your practical implementation must address a one of these or similar problems an
 
 Examples of mini projects you may NOT implement include (i.e. the ban list that will result
 in you getting zero):
+
 1. A cryptocurrency — where the blockchain only has a wallet and transactions (try and be a little more creative ok?).
 2. A Utility library — where there is no user interface (remember we want to play with it and see it works).
 3. Anything copied from the Internet or a previous project — This is plagiarism and the appropriate disciplinary action will follow should this occur (just don’t do it).
+
+## CHipIN
+
+![image](/1.PNG)
